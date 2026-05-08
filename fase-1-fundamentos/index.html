@@ -174,35 +174,58 @@
   </div>
 
   <script>
-    // ---- Os mesmos conceitos do todo.js, agora com interface visual ----
+    // ================================================================
+    // LIÇÃO: localStorage — memória persistente no navegador
+    //
+    // Fluxo:
+    //   ao iniciar  → carregar() lê o caderninho (localStorage)
+    //   ao mudar    → salvar()   escreve no caderninho
+    // ================================================================
 
-    const tarefas = [];
-    let proximoId = 1;
+    // --- CARREGAR: lê os dados salvos ao abrir a página ---
+    // || [] significa "se não houver nada salvo, começa com array vazio"
+    function carregarDoStorage() {
+      const texto = localStorage.getItem("tarefas"); // lê texto do caderninho
+      return texto ? JSON.parse(texto) : [];          // desembala ou retorna []
+    }
+
+    function salvarNoStorage() {
+      const texto = JSON.stringify(tarefas);          // embala o array em texto
+      localStorage.setItem("tarefas", texto);         // escreve no caderninho
+    }
+
+    // --- calcula o maior id já existente para não repetir ---
+    function calcularProximoId(lista) {
+      if (lista.length === 0) return 1;
+      const maiorId = Math.max(...lista.map(t => t.id)); // spread + Math.max
+      return maiorId + 1;
+    }
+
+    // Inicializa com dados do localStorage (ou vazio na primeira vez)
+    const tarefas = carregarDoStorage();
+    let proximoId = calcularProximoId(tarefas);
+
+    // --- As funções de lógica agora chamam salvarNoStorage() ao final ---
 
     function criarTarefa(titulo) {
-      const novaTarefa = {
-        id: proximoId,
-        titulo: titulo,
-        concluida: false
-      };
+      const novaTarefa = { id: proximoId, titulo: titulo, concluida: false };
       proximoId++;
       tarefas.push(novaTarefa);
+      salvarNoStorage(); // ← persiste após cada mudança
       return novaTarefa;
     }
 
     function concluirTarefa(id) {
       const tarefa = tarefas.find(t => t.id === id);
-      if (tarefa) tarefa.concluida = !tarefa.concluida; // alterna
+      if (tarefa) tarefa.concluida = !tarefa.concluida;
+      salvarNoStorage(); // ← persiste após cada mudança
     }
 
     function removerTarefa(id) {
       const posicao = tarefas.findIndex(t => t.id === id);
       if (posicao !== -1) tarefas.splice(posicao, 1);
+      salvarNoStorage(); // ← persiste após cada mudança
     }
-
-    // ---- Funções de interface (DOM) ----
-    // document.getElementById() encontra um elemento HTML pelo id
-    // innerHTML permite escrever HTML dentro de um elemento
 
     function renderizar() {
       const lista = document.getElementById("lista");
@@ -222,8 +245,6 @@
         return;
       }
 
-      // .map() transforma cada item do array em outra coisa — aqui em HTML
-      // .join("") junta tudo num único string
       lista.innerHTML = tarefas.map(tarefa => `
         <div class="tarefa ${tarefa.concluida ? "concluida" : ""}">
           <button class="check-btn" onclick="alternar(${tarefa.id})">
@@ -237,37 +258,30 @@
 
     function adicionarTarefa() {
       const input = document.getElementById("inputTarefa");
-      const titulo = input.value.trim(); // .trim() remove espaços extras
-
-      if (!titulo) return; // não adiciona se estiver vazio
-
+      const titulo = input.value.trim();
+      if (!titulo) return;
       criarTarefa(titulo);
-      input.value = ""; // limpa o campo
+      input.value = "";
       renderizar();
     }
 
-    function alternar(id) {
-      concluirTarefa(id);
-      renderizar();
-    }
+    function alternar(id) { concluirTarefa(id); renderizar(); }
+    function remover(id)   { removerTarefa(id);  renderizar(); }
 
-    function remover(id) {
-      removerTarefa(id);
-      renderizar();
-    }
-
-    // Permite pressionar Enter para adicionar
     document.getElementById("inputTarefa").addEventListener("keydown", function(e) {
       if (e.key === "Enter") adicionarTarefa();
     });
 
-    // Começa com algumas tarefas de exemplo
-    criarTarefa("Aprender variáveis e tipos em JS");
-    criarTarefa("Entender arrays e objetos");
-    criarTarefa("Criar funções");
-    criarTarefa("Construir uma API com Node.js");
-    concluirTarefa(1);
-    concluirTarefa(2);
+    // Na primeira visita (storage vazio), cria tarefas de exemplo
+    if (tarefas.length === 0) {
+      criarTarefa("Aprender variáveis e tipos em JS");
+      criarTarefa("Entender arrays e objetos");
+      criarTarefa("Criar funções");
+      criarTarefa("Construir uma API com Node.js");
+      concluirTarefa(1);
+      concluirTarefa(2);
+    }
+
     renderizar();
   </script>
 </body>
