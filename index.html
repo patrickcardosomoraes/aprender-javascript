@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minhas Tarefas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      min-height: 100vh;
+    }
+
+    .app {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      height: fit-content;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 24px;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #6366f1;
+    }
+
+    button.btn-add {
+      padding: 10px 18px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn-add:hover { background: #4f46e5; }
+
+    .resumo {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .badge-total    { background: #e0e7ff; color: #4338ca; }
+    .badge-pendente { background: #fef3c7; color: #b45309; }
+    .badge-concluida { background: #d1fae5; color: #065f46; }
+
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tarefa {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+
+    .tarefa.concluida {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .tarefa.concluida .titulo {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .check-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: white;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+    }
+
+    .check-btn:hover { border-color: #6366f1; }
+
+    .tarefa.concluida .check-btn {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: white;
+    }
+
+    .titulo {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .del-btn:hover { color: #ef4444; background: #fee2e2; }
+
+    .vazia {
+      text-align: center;
+      color: #94a3b8;
+      padding: 32px 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>📝 Minhas Tarefas</h1>
+
+    <div class="input-area">
+      <input type="text" id="inputTarefa" placeholder="Nova tarefa..." />
+      <button class="btn-add" onclick="adicionarTarefa()">Adicionar</button>
+    </div>
+
+    <div class="resumo" id="resumo"></div>
+    <div class="lista" id="lista"></div>
+  </div>
+
+  <script>
+    const tarefas = [];
+    let proximoId = 1;
+
+    function criarTarefa(titulo) {
+      const novaTarefa = { id: proximoId, titulo: titulo, concluida: false };
+      proximoId++;
+      tarefas.push(novaTarefa);
+      return novaTarefa;
+    }
+
+    function concluirTarefa(id) {
+      const tarefa = tarefas.find(t => t.id === id);
+      if (tarefa) tarefa.concluida = !tarefa.concluida;
+    }
+
+    function removerTarefa(id) {
+      const posicao = tarefas.findIndex(t => t.id === id);
+      if (posicao !== -1) tarefas.splice(posicao, 1);
+    }
+
+    function renderizar() {
+      const lista = document.getElementById("lista");
+      const resumo = document.getElementById("resumo");
+      const pendentes  = tarefas.filter(t => !t.concluida).length;
+      const concluidas = tarefas.filter(t =>  t.concluida).length;
+      resumo.innerHTML = `
+        <span class="badge badge-total">Total: ${tarefas.length}</span>
+        <span class="badge badge-pendente">Pendentes: ${pendentes}</span>
+        <span class="badge badge-concluida">Concluídas: ${concluidas}</span>
+      `;
+      if (tarefas.length === 0) {
+        lista.innerHTML = `<p class="vazia">Nenhuma tarefa ainda. Adicione uma acima!</p>`;
+        return;
+      }
+      lista.innerHTML = tarefas.map(tarefa => `
+        <div class="tarefa ${tarefa.concluida ? "concluida" : ""}">
+          <button class="check-btn" onclick="alternar(${tarefa.id})">
+            ${tarefa.concluida ? "✓" : ""}
+          </button>
+          <span class="titulo">${tarefa.titulo}</span>
+          <button class="del-btn" onclick="remover(${tarefa.id})">✕</button>
+        </div>
+      `).join("");
+    }
+
+    function adicionarTarefa() {
+      const input = document.getElementById("inputTarefa");
+      const titulo = input.value.trim();
+      if (!titulo) return;
+      criarTarefa(titulo);
+      input.value = "";
+      renderizar();
+    }
+
+    function alternar(id) { concluirTarefa(id); renderizar(); }
+    function remover(id)   { removerTarefa(id);  renderizar(); }
+
+    document.getElementById("inputTarefa").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") adicionarTarefa();
+    });
+
+    criarTarefa("Aprender variáveis e tipos em JS");
+    criarTarefa("Entender arrays e objetos");
+    criarTarefa("Criar funções");
+    criarTarefa("Construir uma API com Node.js");
+    concluirTarefa(1);
+    concluirTarefa(2);
+    renderizar();
+  </script>
+</body>
+</html>
