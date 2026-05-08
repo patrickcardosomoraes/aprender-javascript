@@ -71,6 +71,7 @@
       display: flex;
       gap: 12px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -174,24 +175,41 @@
   </div>
 
   <script>
-    const tarefas = [];
-    let proximoId = 1;
+    function carregarDoStorage() {
+      const texto = localStorage.getItem("tarefas");
+      return texto ? JSON.parse(texto) : [];
+    }
+
+    function salvarNoStorage() {
+      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+    }
+
+    function calcularProximoId(lista) {
+      if (lista.length === 0) return 1;
+      return Math.max(...lista.map(t => t.id)) + 1;
+    }
+
+    const tarefas = carregarDoStorage();
+    let proximoId = calcularProximoId(tarefas);
 
     function criarTarefa(titulo) {
       const novaTarefa = { id: proximoId, titulo: titulo, concluida: false };
       proximoId++;
       tarefas.push(novaTarefa);
+      salvarNoStorage();
       return novaTarefa;
     }
 
     function concluirTarefa(id) {
       const tarefa = tarefas.find(t => t.id === id);
       if (tarefa) tarefa.concluida = !tarefa.concluida;
+      salvarNoStorage();
     }
 
     function removerTarefa(id) {
       const posicao = tarefas.findIndex(t => t.id === id);
       if (posicao !== -1) tarefas.splice(posicao, 1);
+      salvarNoStorage();
     }
 
     function renderizar() {
@@ -199,15 +217,18 @@
       const resumo = document.getElementById("resumo");
       const pendentes  = tarefas.filter(t => !t.concluida).length;
       const concluidas = tarefas.filter(t =>  t.concluida).length;
+
       resumo.innerHTML = `
         <span class="badge badge-total">Total: ${tarefas.length}</span>
         <span class="badge badge-pendente">Pendentes: ${pendentes}</span>
         <span class="badge badge-concluida">Concluídas: ${concluidas}</span>
       `;
+
       if (tarefas.length === 0) {
         lista.innerHTML = `<p class="vazia">Nenhuma tarefa ainda. Adicione uma acima!</p>`;
         return;
       }
+
       lista.innerHTML = tarefas.map(tarefa => `
         <div class="tarefa ${tarefa.concluida ? "concluida" : ""}">
           <button class="check-btn" onclick="alternar(${tarefa.id})">
@@ -235,12 +256,15 @@
       if (e.key === "Enter") adicionarTarefa();
     });
 
-    criarTarefa("Aprender variáveis e tipos em JS");
-    criarTarefa("Entender arrays e objetos");
-    criarTarefa("Criar funções");
-    criarTarefa("Construir uma API com Node.js");
-    concluirTarefa(1);
-    concluirTarefa(2);
+    if (tarefas.length === 0) {
+      criarTarefa("Aprender variáveis e tipos em JS");
+      criarTarefa("Entender arrays e objetos");
+      criarTarefa("Criar funções");
+      criarTarefa("Construir uma API com Node.js");
+      concluirTarefa(1);
+      concluirTarefa(2);
+    }
+
     renderizar();
   </script>
 </body>
