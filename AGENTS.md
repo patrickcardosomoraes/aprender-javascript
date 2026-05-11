@@ -69,6 +69,18 @@ O branch `gh-pages` contém apenas `index.html` na raiz (para GitHub Pages).
 
 ---
 
+## Estratégia pedagógica atual
+
+Além das fases técnicas, o estudo seguirá técnicas de ultra aprendizado:
+
+- Projeto real como fio condutor: evoluir a lista de tarefas em pequenos incrementos.
+- Prática deliberada: cada sessão deve ter missão, previsão, implementação, feedback, explicação e desafio.
+- Recordação ativa: pedir que o usuário explique o fluxo sem olhar antes de avançar.
+- Intercalação: misturar conceitos conectados, como array + função, DOM + evento, localStorage + JSON.
+- Dificuldade desejável: propor desafios curtos que exijam pensar, mas sem pular fases.
+
+Documento de apoio: `docs/plano-ultra-aprendizado.md`.
+
 ## Convenções de código
 
 - Português para nomes de variáveis, funções e comentários (contexto de aprendizado)
